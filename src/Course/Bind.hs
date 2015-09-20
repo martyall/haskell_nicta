@@ -20,7 +20,7 @@ import qualified Prelude as P
 
 -- | All instances of the `Bind` type-class must satisfy one law. This law
 -- is not checked by the compiler. This law is given as:
---
+--Course.Bind (=<<)#instance ((->)t)
 -- * The law of associativity
 --   `∀f g x. g =<< (f =<< x) ≅ ((g =<<) . f) =<< x`
 class Apply f => Bind f where
@@ -68,8 +68,7 @@ infixr 1 =<<
   f (a -> b)
   -> f a
   -> f b
-(<*>) =
-  error "todo: Course.Bind#(<*>)"
+(<*>) fphi fa = (\psi -> (psi <$> fa)) =<< fphi
 
 infixl 4 <*>
 
@@ -82,8 +81,7 @@ instance Bind Id where
     (a -> Id b)
     -> Id a
     -> Id b
-  (=<<) =
-    error "todo: Course.Bind (=<<)#instance Id"
+  (=<<) f (Id a) = f a
 
 -- | Binds a function on a List.
 --
@@ -94,8 +92,7 @@ instance Bind List where
     (a -> List b)
     -> List a
     -> List b
-  (=<<) =
-    error "todo: Course.Bind (=<<)#instance List"
+  (=<<) f as = flatMap f as
 
 -- | Binds a function on an Optional.
 --
@@ -106,8 +103,9 @@ instance Bind Optional where
     (a -> Optional b)
     -> Optional a
     -> Optional b
-  (=<<) =
-    error "todo: Course.Bind (=<<)#instance Optional"
+  (=<<) f oa = case oa of
+    Empty -> Empty
+    (Full a) -> (f a) 
 
 -- | Binds a function on the reader ((->) t).
 --
@@ -115,11 +113,10 @@ instance Bind Optional where
 -- 119
 instance Bind ((->) t) where
   (=<<) ::
-    (a -> ((->) t b))
-    -> ((->) t a)
-    -> ((->) t b)
-  (=<<) =
-    error "todo: Course.Bind (=<<)#instance ((->) t)"
+    (a -> ((->) t b)) -- a ~> (t -> b)
+    -> ((->) t a) -- t -> a
+    -> ((->) t b) -- t -> b
+  (=<<) phi f =  (\x -> ((phi . f) x) x)
 
 -- | Flattens a combined structure to a single structure.
 --
@@ -138,8 +135,7 @@ join ::
   Bind f =>
   f (f a)
   -> f a
-join =
-  error "todo: Course.Bind#join"
+join ffa = ffa >>= id
 
 -- | Implement a flipped version of @(=<<)@, however, use only
 -- @join@ and @(<$>)@.
@@ -168,8 +164,7 @@ infixl 1 >>=
   -> (a -> f b)
   -> a
   -> f c
-(<=<) =
-  error "todo: Course.Bind#(<=<)"
+(<=<) g h a = g =<< (h a) 
 
 infixr 1 <=<
 
