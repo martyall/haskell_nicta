@@ -72,31 +72,28 @@ type FilePath =
 run ::
   Chars
   -> IO ()
-run =
-  error "todo: Course.FileIO#run"
+run file = (readFile file)  >>= (getFiles . lines) >>= printFiles
 
 getFiles ::
   List FilePath
   -> IO (List (FilePath, Chars))
-getFiles =
-  error "todo: Course.FileIO#getFiles"
+getFiles fs = sequence $ map getFile fs
 
 getFile ::
   FilePath
   -> IO (FilePath, Chars)
-getFile =
-  error "todo: Course.FileIO#getFile"
+getFile path =  (readFile path) >>= (\content -> (pure (path, content)))
 
 printFiles ::
   List (FilePath, Chars)
   -> IO ()
-printFiles =
-  error "todo: Course.FileIO#printFiles"
+printFiles Nil = pure ()
+printFiles (x:.xs) = printFile' x >> printFiles xs
+  where printFile' (a,b) = printFile a b
 
 printFile ::
   FilePath
   -> Chars
   -> IO ()
-printFile =
-  error "todo: Course.FileIO#printFile"
+printFile path s = putStrLn path >> putStrLn s
 
