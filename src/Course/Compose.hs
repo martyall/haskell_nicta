@@ -1,3 +1,4 @@
+
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
@@ -17,23 +18,29 @@ newtype Compose f g a =
 -- Implement a Functor instance for Compose
 instance (Functor f, Functor g) =>
     Functor (Compose f g) where
-  (<$>) =
-    error "todo: Course.Compose (<$>)#instance (Compose f g)"
+    (<$>) phi (Compose fga) = Compose $ ((<$>) ((<$>) phi)) fga
 
 instance (Apply f, Apply g) =>
   Apply (Compose f g) where
 -- Implement the (<*>) function for an Apply instance for Compose
-  (<*>) =
-    error "todo: Course.Compose (<*>)#instance (Compose f g)"
+  (Compose fgphi) <*> (Compose fga) = Compose $ (lift2 (<*>)) fgphi fga
 
 instance (Applicative f, Applicative g) =>
   Applicative (Compose f g) where
 -- Implement the pure function for an Applicative instance for Compose
-  pure =
-    error "todo: Course.Compose pure#instance (Compose f g)"
+  pure = Compose . pure . pure
 
 instance (Bind f, Bind g) =>
   Bind (Compose f g) where
 -- Implement the (=<<) function for a Bind instance for Compose
-  (=<<) =
-    error "todo: Course.Compose (<<=)#instance (Compose f g)"
+--  phi :: a -> Compose fgb
+  (=<<) = error "not possible"
+
+
+newtype B a = B a deriving Show
+newtype A b = A b deriving Show
+
+f :: A Int -> B Int
+f (A n) = B $ n+1
+
+type Foo = Compose A B
