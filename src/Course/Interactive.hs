@@ -6,8 +6,7 @@ module Course.Interactive where
 
 import Course.Core
 import Course.Functor
-import Course.Applicative
-import Course.Bind
+import Course.Applicative hiding (return)
 import Course.Monad
 import Course.Traversable
 import Course.List
@@ -83,8 +82,7 @@ data Op =
 -- /Tip:/ @putStrLn :: String -> IO ()@ -- Prints a string and then a new line to standard output.
 convertInteractive ::
   IO ()
-convertInteractive =
-  error "todo: Course.Interactive#convertInteractive"
+convertInteractive = (putStrLn "Give me a string.") >- getLine >>= (putStrLn . (map toUpper))
 
 -- |
 --
@@ -112,7 +110,14 @@ convertInteractive =
 reverseInteractive ::
   IO ()
 reverseInteractive =
-  error "todo: Course.Interactive#reverseInteractive"
+  (putStrLn "Give me a file to reverse") >-
+  getLine >>= \rf ->
+  readFile rf >>= \x ->
+  (putStrLn "Give me a file to write to") >-
+  getLine >>= \wf ->
+  let y = (unlines . reverse . lines) x
+  in writeFile wf y
+
 
 -- |
 --
@@ -138,7 +143,21 @@ reverseInteractive =
 encodeInteractive ::
   IO ()
 encodeInteractive =
-  error "todo: Course.Interactive#encodeInteractive"
+  putStrLn "enter a string to url encode:" >-
+  getLine >>= \s ->
+  putStrLn $ foldl (\x y -> x ++ y) "" $ map encode s
+  where
+  encode :: Char -> List Char
+  encode c
+    | c == ' ' = "%20"
+    | c == '\t' = "%09"
+    | c == '\"' = "%22"
+    | otherwise = c :. Nil
+
+foldl :: (a -> b -> b) -> b -> List a -> b
+foldl f init as = case as of
+  Nil -> init
+  x :. xs -> foldl f (f x init) xs
 
 interactive ::
   IO ()
